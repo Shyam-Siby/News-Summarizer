@@ -1,0 +1,25 @@
+<!-- summarizer/templates/summarizer/history_topic.html -->
+
+{% extends 'summarizer/base.html' %}
+
+{% block index %}
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% else %}
+        <h4>{{ topic }}</h4><br>
+        <p>{{ body }}</p>
+
+        <h4>Sentiment Analysis</h4>
+        <p>Classification: {{ sentiment_classification }}</p>
+        <p>Polarity: {{ sentiment_polarity }}</p>
+        <p>Subjectivity: {{ sentiment_subjectivity }}</p>
+
+        <h4>Sentiment Analysis Plot</h4>
+        <img src="data:image/png;base64,{{ sentiment_plot }}" alt="Sentiment Analysis Plot">
+        <a href="{% url 'download_summary_pdf' summary_id %}" class="btn btn-primary">Download as PDF</a>
+
+
+    {% endif %}
+
+{% endblock %}

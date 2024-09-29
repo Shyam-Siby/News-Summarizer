@@ -1,0 +1,50 @@
+{% extends "summarizer/base.html" %}
+{% load static %}
+{% block index %}
+
+    <div class="row">
+        <div>
+            <img src="{% static 'images/logo.jpg' %}" style="width: 70px">
+        </div>
+        <div>
+            <h3>Automatic News Summarizer</h3>
+            <p>"Don't waste your time reading long News."</p>
+        </div>
+        {% comment %} <div class="col-sm-2">
+            <a class="btn btn-primary" href="{% url 'nepali' %}">NP</a>
+        </div> {% endcomment %}
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-6">
+            {% if original_text %}
+                <h3>Original Text/URL</h3>
+                {{ original_text }}
+            {% else %}
+                {% include "summarizer/includes/text_input_form.html" %}
+            {% endif %}
+        </div>
+
+        <div class="col-sm-6">
+            {% include "summarizer/includes/result.html" %}
+        </div>
+
+    </div>
+
+    {% if sentiment %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h4>Sentiment Analysis</h4>
+            <p>Classification: {{ sentiment.classification }}</p>
+            <p>Polarity: {{ sentiment.polarity }}</p>
+            <p>Subjectivity: {{ sentiment.subjectivity }}</p>
+
+            <h4>Sentiment Analysis Plot</h4>
+    <img src="data:image/png;base64,{{ sentiment_plot }}" alt="Sentiment Analysis Plot">
+
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock %}

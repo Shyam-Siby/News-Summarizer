@@ -1,0 +1,23 @@
+<!-- summarizer/templates/summarizer/my_template.html -->
+
+{% extends 'summarizer/base.html' %}
+
+{% block index %}
+    <div class="container">
+        <h2>Summary Details</h2>
+        
+        <h3>Original Text/URL</h3>
+        <p>{{ object.original_text }}</p>
+        
+        <h3>Summary</h3>
+        <p>{{ object.summary }}</p>
+        
+        <h3>Sentiment Analysis</h3>
+        <p>Classification: {{ object.sentiment_classification }}</p>
+        <p>Polarity: {{ object.sentiment_polarity }}</p>
+        <p>Subjectivity: {{ object.sentiment_subjectivity }}</p>
+        
+        <h3>Sentiment Analysis Plot</h3>
+        <img src="data:image/png;base64,{{ object.sentiment_plot }}" alt="Sentiment Analysis Plot">
+    </div>
+{% endblock %}
