@@ -20,6 +20,7 @@ import base64
 
 import nltk
 nltk.download('punkt')
+nltk.download('stopwords')
 
 def index(request):
     return render(request, 'summarizer/index.html')
