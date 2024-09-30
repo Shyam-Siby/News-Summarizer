@@ -1,18 +1,15 @@
 from datetime import date
 import os
+import tempfile
+from PIL import Image  # Correct import
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from summarizer.models import Summary
 from .algorithms.scoring import scoring_algorithm, scoring_nepali
 from .algorithms.frequency import extraction, frequency_nepali, frequency_algorithm
-from .algorithms.scoring import scoring_algorithm, scoring_nepali
-from .algorithms.frequency import frequency_algorithm, frequency_nepali
 from .algorithms.sentiment_analysis import analyze_sentiment
 from .algorithms.visualization import plot_sentiment
-from .algorithms.sentiment_analysis import analyze_sentiment
-from .algorithms.visualization import plot_sentiment
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from .models import MyModel
 from reportlab.lib.pagesizes import letter
@@ -21,10 +18,11 @@ from django.http import HttpResponse
 from io import BytesIO
 import base64
 
+import nltk
+nltk.download('punkt')
 
 def index(request):
     return render(request, 'summarizer/index.html')
-
 
 def summarize_page(request):
     url = request.GET.get('url')
@@ -48,7 +46,6 @@ def summarize_page(request):
     sentiment = analyze_sentiment(summary)
     sentiment_plot = plot_sentiment(sentiment)
 
-
     context = {
         'data': summary,
         'original_text': original_text,
@@ -56,7 +53,6 @@ def summarize_page(request):
         'sentiment_plot': sentiment_plot
     }
     return render(request, "summarizer/index.html", context)
-
 
 def summarize_nepali_page(request):
     url = request.GET.get('url')
@@ -80,7 +76,6 @@ def summarize_nepali_page(request):
 
     context = {'data': summary, 'original_text': original_text}
     return render(request, "summarizer/index.html", context)
-
 
 @login_required
 def save_summary(request):
@@ -108,12 +103,10 @@ def save_summary(request):
     context = {'message': 'success'}
     return render(request, "summarizer/index.html", context)
 
-
 def history(request):
     summary = Summary.objects.filter(user=request.user).order_by('-id')
     context = {'data': summary}
     return render(request, "summarizer/history.html", context)
-
 
 def history_topic(request):
     if request.method == 'GET':
@@ -158,43 +151,6 @@ def history_topic(request):
             'error': 'Invalid request method.'
         }
     return render(request, "summarizer/history_topic.html", context)
-
-import tempfile
-
-import nltk
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-import base64
-import tempfile
-
-nltk.download('punkt')
-
-import nltk
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-import base64
-import tempfile
-from PIL import Image
-
-nltk.download('punkt')
-
-import nltk
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-import base64
-import tempfile
-from PIL import Image
-
-nltk.download('punkt')
 
 def download_summary_pdf(request, summary_id):
     # Fetch the summary from the database
@@ -291,11 +247,6 @@ def download_summary_pdf(request, summary_id):
     response['Content-Disposition'] = f'attachment; filename=summary_{summary_id}.pdf'
 
     return response
-
-
-
-
-
 
 def my_view(request, pk):
     # Retrieve the object or return a 404 error if not found
