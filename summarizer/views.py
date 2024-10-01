@@ -5,6 +5,7 @@ from PIL import Image  # Correct import
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
+import requests
 from summarizer.models import Summary
 from .algorithms.scoring import scoring_algorithm, scoring_nepali
 from .algorithms.frequency import extraction, frequency_nepali, frequency_algorithm
@@ -14,7 +15,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from .models import MyModel
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas  # Import canvas from reportlab
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from io import BytesIO
 import base64
 
@@ -256,3 +257,50 @@ def my_view(request, pk):
     
     # Render the template with the context
     return render(request, 'summarizer/my_template.html', {'object': my_object})
+
+
+# Replace with your API key and URL
+API_KEY = 'AIzaSyC9LSxC6eMBW6Z1h9WfrknbEhh2e_PSni8'
+API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent'
+
+# Define predefined responses for the chatbot
+PREDEFINED_RESPONSES = {
+    'hello': 'Hi there! How can I assist you today?',
+    'bye': 'Goodbye! Have a great day!',
+    # Add more predefined responses as needed
+}
+
+def chatbot(request):
+    if request.method == 'POST':
+        user_message = request.POST.get('message')
+        conversation_history = request.session.get('conversation_history', [])
+
+        # Append user message to the conversation history
+        conversation_history.append(f"input: {user_message}")
+        bot_reply = PREDEFINED_RESPONSES.get(user_message.lower(), None)  # Case insensitive match
+
+        if not bot_reply:
+            # Make a request to the Google API if the message is not predefined
+            headers = {'Content-Type': 'application/json'}
+            messages = [{'text': message} for message in conversation_history]
+
+            data = {'contents': [{'parts': messages}]}
+
+            try:
+                response = requests.post(f'{API_URL}?key={API_KEY}', headers=headers, json=data)
+                response.raise_for_status()
+                api_response = response.json()
+                bot_reply = api_response['candidates'][0]['content']['parts'][0]['text']
+                bot_reply = '. '.join(bot_reply.split('. ')[:3])  # Limit response to 3 sentences
+            except requests.RequestException as e:
+                print(f"API request error: {e}")
+                bot_reply = 'Sorry, there was an error processing your request.'
+
+        # Append bot reply to conversation history
+        conversation_history.append(f"output: {bot_reply}")
+        request.session['conversation_history'] = conversation_history
+
+        # Return the bot reply as a JSON response
+        return JsonResponse({'reply': bot_reply})
+
+    return render(request,'chatbot.html')

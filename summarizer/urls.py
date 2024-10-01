@@ -14,5 +14,6 @@ urlpatterns = [
     path('history_topic', views.history_topic, name='history_topic'),
     path('nepali', TemplateView.as_view(template_name='summarizer/nepali.html'), name='nepali'),
     path('download_summary_pdf/<int:summary_id>/', views.download_summary_pdf, name='download_summary_pdf'),
+    path('chatbot/',views.chatbot, name='chatbot'),
 
 ]
